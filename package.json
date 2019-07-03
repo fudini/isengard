@@ -22,6 +22,6 @@
     "typescript": "3.3.3333"
   },
   "bin": {
-    "isengard": "./bin/isengard.js"
+    "isengard": "bin/isengard.js"
   }
 }
