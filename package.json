@@ -2,21 +2,26 @@
   "name": "isengard",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": ".dist/index.js",
   "scripts": {
     "watch": "tsc -w"
   },
-  "author": "",
+  "author": "Daniel Fudala <daniel@fuda.la>",
   "license": "ISC",
+  "typings": "./dist/index.d.ts",
   "dependencies": {
     "node-watch": "0.6.0",
-    "rxjs": "6.4.0",
-    "rxjs-compat": "6.4.0",
+    "rx-lite": "4.0.8",
     "tail": "2.0.2",
     "tree-kill": "1.2.1"
   },
   "devDependencies": {
-    "@types/node": "^11.10.4",
-    "@types/tail": "^1.2.1"
+    "@types/node": "11.10.4",
+    "@types/rx-lite": "4.0.6",
+    "@types/tail": "1.2.1",
+    "typescript": "3.3.3333"
+  },
+  "bin": {
+    "isengard": "./bin/isengard"
   }
 }

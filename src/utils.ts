@@ -24,20 +24,25 @@ interface Open {
   flags: string[]
 }
 
+/**
+ * Parse the strace open("") logs
+ * There is this project to parse strace to json:
+ * https://github.com/dannykopping/b3
+ */
 let parseOpen = (open: string): Open | null => {
 
-  let match = open.match(/open\((.*?)\)/)
+  const match = open.match(/open\((.*?)\)/)
 
   if (match === null) {
     return null
   }
 
-  let [quotedPath, flagsString] = match[1].split(', ')
-  let unquotedPath = quotedPath.replace(/"/g, '')
+  const [quotedPath, flagsString] = match[1].split(', ')
+  const unquotedPath = quotedPath.replace(/"/g, '')
   // paths can be relative
-  let resolvedPath = path.resolve(unquotedPath)
+  const resolvedPath = path.resolve(unquotedPath)
 
-  let flags = flagsString.split('|')
+  const flags = flagsString.split('|')
 
   return {
     path: resolvedPath,
@@ -49,9 +54,7 @@ async function readStrace(fileName: string, handler: (line: string) => void) {
 
   await whenFileExists(fileName)
 
-  const input = new Tail(fileName, {
-    fromBeginning: true
-  })
+  const input = new Tail(fileName, { fromBeginning: true })
 
   input.on('line', handler)
 

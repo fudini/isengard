@@ -1,5 +1,5 @@
-import { Observable, Observer } from 'rxjs'
-import { take, share, filter, throttleTime } from 'rxjs/operators'
+import { Observable, Observer } from 'rx-lite'
+
 import watch from 'node-watch'
 
 type WatchItem = [string, string]
@@ -12,7 +12,7 @@ let watchObservable = (
   return Observable.create((observer: Observer<WatchItem>) => {
 
     let watcher = watch(rootPath, options, (type: string, name: string) => {
-      observer.next([type, name])
+      observer.onNext([type, name])
     })
 
     return () => {
@@ -32,16 +32,13 @@ const Isengard = (rootPath: string) => {
 
   let changedFiles$ = watchObservable(rootPath, options)
 
-  let $ = changedFiles$.pipe(
-    throttleTime(100),
+  let $ = changedFiles$
     // super slow
     // needs some trees if there are a lot of files
-    // TODO: add glob matching
-    filter(([action, file]) => {
+    .filter(([action, file]) => {
       return files.includes(file)
-    }),
-    take(1) // we only need this to happen once
-  )
+    })
+    .take(1) // we only need this to happen once
 
   let addFile = (name: string) => {
     files.push(name)

@@ -7,6 +7,7 @@ import { readStrace, parseOpen, random, loadConfig } from './utils'
 import { Isengard } from './Isengard'
 
 let config = loadConfig()
+console.log('isengard started with config:')
 console.log(config)
 
 const tmpRootPath = '/tmp'
@@ -30,21 +31,9 @@ async function app() {
   let killed = false
 
   const strace = spawn(program, args, {
-    //stdio: 'inherit',
-    stdio: 'pipe',
+    stdio: 'inherit',
     detached: false
   })
-
-  if (strace.stdout !== null && strace.stderr !== null) {
-    strace.stdout.on('data', data => {
-      process.stdout.write(data)
-    })
-
-    strace.stderr.on('data', (data) => {
-      process.stderr.write(data)
-    })
-  }
-
 
   const files = await readStrace(tmpFullPath, line => {
 
@@ -56,14 +45,14 @@ async function app() {
 
     const { path, flags } = parsed 
 
-    // we don't want the files that process writes to to be on the list
+    // we don't want the files that process writes to be on the list
     if (!flags.includes('O_RDONLY')) {
       return 
     }
 
     // default only from the same path
     // the rest of configuration comes from:
-    // .isengardrc
+    // .isengard
     if (!path.startsWith(cwd)) {
       return
     }
@@ -86,7 +75,7 @@ async function app() {
       fs.unlinkSync(tmpFullPath)
       killed = true
     }
-    isengardSub.unsubscribe()
+    isengardSub.dispose()
     app()
   })
 
