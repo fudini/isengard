@@ -74,7 +74,7 @@ const loadConfig = () => {
   let defaultConfig: Config = {
     include: [],
     exclude: [],
-    trace: true
+    trace: false
   }
 
   try {
