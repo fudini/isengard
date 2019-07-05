@@ -3,7 +3,7 @@ import path from 'path'
 import { spawn, exec } from 'child_process'
 import { Observable } from 'rx-lite'
 import watch from 'node-watch'
-import kill from 'tree-kill'
+import kill from 'tree-kill-sync'
 import { readStrace, parseOpen, random, loadConfig } from './utils'
 import { Isengard } from './Isengard'
 
@@ -39,6 +39,8 @@ async function app() {
     stdio: 'inherit',
     detached: false
   })
+
+  log('subprocess id ' + strace.pid)
 
   // in case if watched process exited
   strace.on('close', (code: any) => {
@@ -90,12 +92,10 @@ async function app() {
     isengardSub.dispose()
 
     if (!killed) {
-      log('killing process')
-      kill(strace.pid, () => {
-        log('process killed')
-        app()
-      })
+      log('killing process id ' + strace.pid)
       killed = true
+      kill(strace.pid)
+      app()
     } else {
       app()
     }
