@@ -1,21 +1,26 @@
 import fs from 'fs'
 import path from 'path'
 import { spawn, exec } from 'child_process'
+import { Observable } from 'rx-lite'
 import watch from 'node-watch'
 import kill from 'tree-kill'
 import { readStrace, parseOpen, random, loadConfig } from './utils'
 import { Isengard } from './Isengard'
 
+const log = (msg: string) => {
+  console.log('ISENGARD: ' + msg)
+}
+
 let config = loadConfig()
-console.log('isengard started with config:')
-console.log(config)
+log('isengard started with config:')
+log(JSON.stringify(config))
 
 const tmpRootPath = '/tmp'
 
 const tmpFileName = `${random()}.strace`
 const tmpFullPath = path.resolve(tmpRootPath, tmpFileName)
 
-console.log('tmp file: ', tmpFullPath)
+log('tmp file: ' + tmpFullPath)
 
 const [,, ...a] = process.argv
 const command = a.join(' ')
@@ -33,6 +38,16 @@ async function app() {
   const strace = spawn(program, args, {
     stdio: 'inherit',
     detached: false
+  })
+
+  // in case if watched process exited
+  strace.on('close', (code: any) => {
+    if (!killed) {
+      kill(strace.pid)
+      //fs.unlinkSync(tmpFullPath)
+      killed = true
+    }
+    log(`child process exited with code ${code}`)
   })
 
   const files = await readStrace(tmpFullPath, line => {
@@ -65,29 +80,26 @@ async function app() {
     isengard.addFile(path)
   })
 
+
   const isengard = Isengard(cwd)
 
   const isengardSub = isengard.$.subscribe(() => {
-    console.log('-------------------RESTART----------------')
-    if (!killed) {
-      files.close()
-      kill(strace.pid)
-      fs.unlinkSync(tmpFullPath)
-      killed = true
-    }
+    log('-------------------RESTART----------------')
+    files.close()
+    fs.unlinkSync(tmpFullPath)
     isengardSub.dispose()
-    app()
+
+    if (!killed) {
+      log('killing process')
+      kill(strace.pid, () => {
+        log('process killed')
+        app()
+      })
+      killed = true
+    } else {
+      app()
+    }
   })
 
-  // in case if watched process exited
-  strace.on('close', (code: any) => {
-    if (!killed) {
-      files.close()
-      kill(strace.pid)
-      fs.unlinkSync(tmpFullPath)
-      killed = true
-    }
-    console.log(`child process exited with code ${code}`)
-  })
 }
 
