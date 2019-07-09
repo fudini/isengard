@@ -67,21 +67,25 @@ type Config = {
   include: string[]
   exclude: string[]
   trace: boolean // show strace output in stdout
+  exitCodes: number[] // exit isengard watcher if watched program exists with any of these codes
 }
 
-const loadConfig = () => {
+const loadConfig = (log: (msg: string) => void) => {
 
   let defaultConfig: Config = {
     include: [],
     exclude: [],
-    trace: false
+    trace: false,
+    exitCodes: [],
   }
 
   try {
     let userConfig = JSON.parse(fs.readFileSync('.isengard', 'utf8'))
     let config: Config = { ...defaultConfig, ...userConfig }
     return config
-  } catch {
+  } catch(e) {
+    log('error parsing .isengard config file')
+    log(e)
     return defaultConfig
   }
 }

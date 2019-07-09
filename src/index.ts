@@ -11,7 +11,7 @@ const log = (msg: string) => {
   console.log('ISENGARD: ' + msg)
 }
 
-let config = loadConfig()
+let config = loadConfig(log)
 log('isengard started with config:')
 log(JSON.stringify(config))
 
@@ -43,13 +43,17 @@ async function app() {
   log('subprocess id ' + strace.pid)
 
   // in case if watched process exited
-  strace.on('close', (code: any) => {
+  strace.on('close', (code: number) => {
     if (!killed) {
       kill(strace.pid)
-      //fs.unlinkSync(tmpFullPath)
       killed = true
     }
     log(`child process exited with code ${code}`)
+    if (config.exitCodes.includes(code)) {
+      log('exiting')
+      fs.unlinkSync(tmpFullPath)
+      process.exit()
+    }
   })
 
   const files = await readStrace(tmpFullPath, line => {
@@ -95,11 +99,7 @@ async function app() {
       log('killing process id ' + strace.pid)
       killed = true
       kill(strace.pid)
-      app()
-    } else {
-      app()
     }
+    app()
   })
-
 }
-

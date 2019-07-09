@@ -12,11 +12,12 @@ isengard yourprogram
 
 You can configure it with `.isengard` file
 
-```bash
+```json
 {
   "include": [],
   "exclude": [],
-  "trace": true
+  "trace": true,
+  "exitCodes": []
 }
 ```
 
