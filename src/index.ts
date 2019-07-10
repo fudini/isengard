@@ -45,14 +45,14 @@ async function app() {
   // in case if watched process exited
   strace.on('close', (code: number) => {
     if (!killed) {
+      log(`child process exited with code ${code}`)
       kill(strace.pid)
       killed = true
-    }
-    log(`child process exited with code ${code}`)
-    if (config.exitCodes.includes(code)) {
-      log('exiting')
-      fs.unlinkSync(tmpFullPath)
-      process.exit()
+      if (config.exitCodes.includes(code)) {
+        log('exiting')
+        fs.unlinkSync(tmpFullPath)
+        process.exit()
+      }
     }
   })
 
@@ -87,10 +87,11 @@ async function app() {
   })
 
 
-  const isengard = Isengard(cwd)
+  const isengard = Isengard(cwd, config.exclude)
 
-  const isengardSub = isengard.$.subscribe(() => {
+  const isengardSub = isengard.$.subscribe(([action, file]) => {
     log('-------------------RESTART----------------')
+    log(`file: ${file}`)
     files.close()
     fs.unlinkSync(tmpFullPath)
     isengardSub.dispose()

@@ -21,7 +21,7 @@ let watchObservable = (
   })
 }
 
-const Isengard = (rootPath: string) => {
+const Isengard = (rootPath: string, exclude: string[]) => {
 
   let files: string[] = []
 
@@ -35,7 +35,12 @@ const Isengard = (rootPath: string) => {
   let $ = changedFiles$
     // super slow
     // needs some trees if there are a lot of files
-    .filter(([action, file]) => {
+    .filter(([_, file]) => {
+      return exclude.reduce((matches, regex) => {
+        return matches || RegExp(regex).test(file)
+      }, false)
+    })
+    .filter(([_, file]) => {
       return files.includes(file)
     })
     .take(1) // we only need this to happen once
