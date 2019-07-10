@@ -36,7 +36,7 @@ const Isengard = (rootPath: string, exclude: string[]) => {
     // super slow
     // needs some trees if there are a lot of files
     .filter(([_, file]) => {
-      return exclude.reduce((matches, regex) => {
+      return !exclude.reduce((matches, regex) => {
         return matches || RegExp(regex).test(file)
       }, false)
     })
