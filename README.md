@@ -22,7 +22,7 @@ You can configure it with `.isengard` file
 ```
 
 ### Todo:
-
+* kill child processes if isengard dies
 * attach strace to the process
 * separate app and index.js
 * errors if you try to watch dodgy file

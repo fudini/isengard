@@ -2,7 +2,6 @@ import fs from 'fs'
 import path from 'path'
 import { spawn, exec } from 'child_process'
 import { Observable } from 'rx-lite'
-import watch from 'node-watch'
 import kill from 'tree-kill-sync'
 import { readStrace, parseOpen, random, loadConfig } from './utils'
 import { Isengard } from './Isengard'
@@ -25,7 +24,7 @@ log('tmp file: ' + tmpFullPath)
 const [,, ...a] = process.argv
 const command = a.join(' ')
 
-const straceCmd = `strace -e trace=open -o ${tmpFullPath} ${command}`
+const straceCmd = `strace -e trace=open,openat -o ${tmpFullPath} ${command}`
 const [program, ...args] = straceCmd.split(' ')
 const cwd = process.cwd()
 

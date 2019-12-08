@@ -24,6 +24,26 @@ interface Open {
   flags: string[]
 }
 
+let getUnparsed = (open: string): [string, string] | null => {
+
+  let match = open.match(/open\((.*?)\)/)
+
+  if (match !== null) {
+
+    const [quotedPath, flagsString] = match[1].split(', ')
+    return [quotedPath, flagsString]
+  }
+
+  const match2 = open.match(/openat\((.*?)\)/)
+
+  if (match2 === null) {
+    return null
+  }
+
+  const [, quotedPath, flagsString] = match2[1].split(', ')
+  return [quotedPath, flagsString]
+}
+
 /**
  * Parse the strace open("") logs
  * There is this project to parse strace to json:
@@ -31,13 +51,14 @@ interface Open {
  */
 let parseOpen = (open: string): Open | null => {
 
-  const match = open.match(/open\((.*?)\)/)
+  let unparsed = getUnparsed(open)
 
-  if (match === null) {
+  if (unparsed === null) {
     return null
   }
 
-  const [quotedPath, flagsString] = match[1].split(', ')
+  const [quotedPath, flagsString] = unparsed
+
   const unquotedPath = quotedPath.replace(/"/g, '')
   // paths can be relative
   const resolvedPath = path.resolve(unquotedPath)
