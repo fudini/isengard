@@ -10,7 +10,7 @@
   "license": "ISC",
   "typings": "./dist/index.d.ts",
   "dependencies": {
-    "node-watch": "0.6.0",
+    "node-watch": "0.6.4",
     "rx-lite": "4.0.8",
     "tail": "2.0.2",
     "tree-kill-sync": "1.0.0"
